@@ -79,7 +79,8 @@
             									<div class="col-4">Kode Produk</div>
             									<div class="col-8">
             										<div class="input-group">
-            											<input type="text" onchange="searchProduk()" class="form-control" name="kode_produk" id="kode_produk" >
+            											<input type="text" onchange="searchProduk()"
+            												class="form-control" name="kode_produk" id="kode_produk">
             											<div class="input-group-append">
             												<button type="button" class="btn btn-group-grey"
             													data-toggle="modal"
@@ -111,7 +112,7 @@
             								<div class="row mb-2">
             									<div class="col-4">Satuan</div>
             									<div class="col-8">
-            										<input type="text" id="satuan" class="form-control" >
+            										<input type="text" id="satuan" class="form-control">
             									</div>
             								</div>
             								<div class="hr-blue"></div>
@@ -395,7 +396,7 @@
             							</thead>
             							<tbody>
             								<?php $no = 1;foreach ($data_pending as $dp) {?>
-            								<tr>
+            								<tr class="row-pending numberRowPending_<?=$dp->faktur?>" onclick="getValueRowPending('<?=$dp->faktur?>')">
             									<td><?=$no++;?></td>
             									<td><?=$dp->faktur;?></td>
             									<td><?=$dp->customer_name;?></td>
@@ -509,7 +510,7 @@ $replace = [" ", "+", "-"];
             								data-dismiss="modal">Batal</button>
             							<button type="button" class="btn"
             								style="margin-right: 10px; padding: 7px 20px; background: #F4F4F4; color: #9C9C9C; border: 1px solid #ccc; border-radius: 4px;"
-            								data-dismiss="modal">Opsi Harga</button>
+            								onclick="showOpsiHarga()">Opsi Harga</button>
             							<button type="button" onclick="nextProduk()" class="btn btn-simpan"
             								style="padding: 7px 30px;">Lanjutkan <span class="iconify-inline ml-1"
             									data-icon="akar-icons:arrow-right"></span></button>
@@ -553,6 +554,36 @@ $replace = [" ", "+", "-"];
             	</div>
             </div>
             <!-- end modal -->
+
+            <!-- Modal modal opsi harga -->
+            <div class="modal fade" id="modal-opsi-harga" tabindex="-1" role="dialog" aria-labelledby="modelTitleId"
+            	aria-hidden="true">
+            	<div class="modal-dialog" role="document">
+            		<div class="modal-content">
+            			<div class="modal-header">
+            				<h5 class="title-modal">Opsi Harga Produk</h5>
+            				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            					<span aria-hidden="true">&times;</span>
+            				</button>
+            			</div>
+            			<div class="modal-body">
+            				<table class="table">
+            					<thead>
+            						<th>No</th>
+            						<th>Nama</th>
+            						<th>Harga</th>
+            					</thead>
+            					<tbody id="show-data-opsi-harga">
+            					</tbody>
+            				</table>
+            			</div>
+            			<div class="modal-footer">
+            				<button type="button" class="btn btn-secondary" data-dismiss="modal">Batalkan</button>
+            				<button type="button" class="btn btn-primary btn-xs" style="padding: 7x 30px;">Pilih</button>
+            			</div>
+            		</div>
+            	</div>
+            </div>
             <script src="<?=base_url()?>assets/vendor/jquery/jquery-3.6.0.min.js"></script>
             <script src="<?=base_url();?>node_modules/sweetalert/dist/sweetalert.min.js"></script>
             <script>
@@ -565,8 +596,12 @@ $replace = [" ", "+", "-"];
             			showProduk(page);
             		});
             		localStorage.setItem('phone_number', null)
-					localStorage.setItem('kode_produk', null)
+            		localStorage.setItem('kode_produk', null)
             	});
+            	// use for show opsi harga produk
+            	function showOpsiHarga() {
+            		$("#modal-opsi-harga").modal("show");
+            	}
 
             	function getValue(id) {
             		let newId = id;
@@ -577,10 +612,16 @@ $replace = [" ", "+", "-"];
             		$("#namerow_" + result).attr("style", "background: rgb(180, 235, 180);");
             		checkData(id)
             	}
+				// use for change color row pending
+				function getValueRowPending(faktur) {
+					$(".row-pending").removeAttr("style");
+					$(".numberRowPending_" + faktur).attr("style", "background: rgb(180, 235, 180);");
+				 }
             	// use for reset buyer form
             	function resetBuyerForm() {
             		$("#buyerForm")[0].reset();
             	}
+
             	function checkData(id) {
             		localStorage.setItem("phone_number", id)
             		$.ajax({
@@ -644,51 +685,55 @@ $replace = [" ", "+", "-"];
             			}
             		});
             	}
-				// change color row produk
-				function produkSelected(kode) {
-					localStorage.setItem('kode_produk', kode);
-					$(".table-row-produk").removeAttr("style");
-					$(".rowProdukname_" + kode).attr("style", "background: rgb(180, 235, 180);");
-				 }
-				//  next product after selected on data product
-				function nextProduk() {
-					let kode_produk = localStorage.getItem('kode_produk');
-					if (kode_produk=="null") {
-						swal({
-							title: "Peringatan!",
-							text: "Silahkan pilih data produk terlebih dahulu",
-							icon: "warning",
-							button: "Ok",
-						});
-					} else{
-						findProduk(kode_produk)
-				 }
-				}
-				// find product by scanner tool
-				function findProductByScanner() {
-					let code=$("#kode_produk").val();
-					findProduk(code)
-				 }
-				// use for find product
-				function findProduk (code) {
-					$.ajax({
-						type: "POST",
-						url: url+"Penjualan/findSpecificProductByCode",
-						data: {code:localStorage.getItem('kode_produk')},
-						dataType: "JSON",
-						success: function (response) {
-							$("#modalProduk").modal("hide");
-							$("#kode_produk").val(response.kode);
-							$("#namaproduk").val(response.nama);
-							$("#satuan").val(response.satuan);
-						},error:function(){
-							swal({
-								title: "Peringatan!",
-								text: "Data produk tidak ditemukan",
-								icon: "warning",
-								button: "Ok",
-							});
-						}
-					});
-				 }
+            	// change color row produk
+            	function produkSelected(kode) {
+            		localStorage.setItem('kode_produk', kode);
+            		$(".table-row-produk").removeAttr("style");
+            		$(".rowProdukname_" + kode).attr("style", "background: rgb(180, 235, 180);");
+            	}
+            	//  next product after selected on data product
+            	function nextProduk() {
+            		let kode_produk = localStorage.getItem('kode_produk');
+            		if (kode_produk == "null") {
+            			swal({
+            				title: "Peringatan!",
+            				text: "Silahkan pilih data produk terlebih dahulu",
+            				icon: "warning",
+            				button: "Ok",
+            			});
+            		} else {
+            			findProduk(kode_produk)
+            		}
+            	}
+            	// find product by scanner tool
+            	function findProductByScanner() {
+            		let code = $("#kode_produk").val();
+            		findProduk(code)
+            	}
+            	// use for find product
+            	function findProduk(code) {
+            		$.ajax({
+            			type: "POST",
+            			url: url + "Penjualan/findSpecificProductByCode",
+            			data: {
+            				code: localStorage.getItem('kode_produk')
+            			},
+            			dataType: "JSON",
+            			success: function (response) {
+            				$("#modalProduk").modal("hide");
+            				$("#kode_produk").val(response.kode);
+            				$("#namaproduk").val(response.nama);
+            				$("#satuan").val(response.satuan);
+            			},
+            			error: function () {
+            				swal({
+            					title: "Peringatan!",
+            					text: "Data produk tidak ditemukan",
+            					icon: "warning",
+            					button: "Ok",
+            				});
+            			}
+            		});
+            	}
+
             </script>
