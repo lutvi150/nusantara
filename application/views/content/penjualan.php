@@ -148,7 +148,7 @@
             									<div class="col-8 form-inline">
             										<div class="form-group mr-2"><input type="text" class="form-control"
             												style="width: 90px;"></div>
-            										<div class="form-group"><input type="text" class="form-control"
+            										<div class="form-group"><input type="text" readonly class="form-control satuan"
             												style="width: 94px;"></div>
             									</div>
             								</div>
@@ -160,7 +160,7 @@
             								</div>
             								<div class="row mb-2">
             									<div class="col-12 text-right">
-            										<button class="btn btn-greylight"><span class="iconify-inline"
+            										<button onclick="chartAdd()" type="button" class="btn btn-greylight"><span class="iconify-inline"
             												data-icon="fluent:cart-16-regular"
             												style="color: #2196F3; font-weight: 500; margin-right: 5px;">
             											</span>Tambah Ke Keranjang</button>
@@ -173,7 +173,7 @@
             								<div class="row mb-2">
             									<div class="col-4">PPN</div>
             									<div class="col-8 form-inline">
-            										<div class="form-group mr-2"><input type="text" class="form-control"
+            										<div class="form-group mr-2"><input type="text" id="" class="form-control"
             												style="width: 60px;"></div>
             										<div class="form-group"><input type="text" class="form-control"
             												style="width: 127px;"></div>
@@ -193,7 +193,7 @@
             												type="checkbox" class="form-check-input" value=""> Harga
             											Produk</label></div>
             									<div class="col-8">
-            										<input type="text" class="form-control">
+            										<input type="text" id="harga_produk" class="form-control">
             									</div>
             								</div>
             								<div class="row mb-2">
@@ -574,12 +574,17 @@ $replace = [" ", "+", "-"];
             						<th>Harga</th>
             					</thead>
             					<tbody id="show-data-opsi-harga">
+									<tr>
+										<td></td>
+										<td></td>
+										<td></td>
+									</tr>
             					</tbody>
             				</table>
             			</div>
             			<div class="modal-footer">
             				<button type="button" class="btn btn-secondary" data-dismiss="modal">Batalkan</button>
-            				<button type="button" class="btn btn-primary btn-xs" style="padding: 7x 30px;">Pilih</button>
+            				<button type="button" onclick="movePriceOptionToInput()" class="btn btn-primary btn-xs" style="padding: 7x 30px;">Pilih</button>
             			</div>
             		</div>
             	</div>
@@ -595,14 +600,75 @@ $replace = [" ", "+", "-"];
             			var page = $(this).data("ci-pagination-page");
             			showProduk(page);
             		});
-            		localStorage.setItem('phone_number', null)
-            		localStorage.setItem('kode_produk', null)
-            	});
+					localStorage.clear();
+				});
             	// use for show opsi harga produk
             	function showOpsiHarga() {
-            		$("#modal-opsi-harga").modal("show");
+					let kode_produk = localStorage.getItem('kode_produk')
+					$.ajax({
+						type: "POST",
+						url: url+"Penjualan/getPriceOption",
+						data: {
+							kode_produk: kode_produk
+						},
+						dataType: "JSON",
+						success: function (response) {
+							if (response.data=="") {
+								swal({
+									title: "Opsi Harga Produk",
+									text: "Opsi harga produk tidak ditemukan",
+									icon: "warning",
+									button: "OK",
+								});
+							} else{
+								let html="";
+								$.each(response.data, function (indexInArray, valueOfElement) {
+									html+=`<tr class="rowPriceOption priceOption_${valueOfElement.id}" onclick="priceOptionSelected(${valueOfElement.id})">
+										<td>${indexInArray+1}</td>
+										<td>${valueOfElement.jenis_member}</td>
+										<td>${valueOfElement.harga}</td>
+									</tr>`;
+								});
+								$("#show-data-opsi-harga").html(html);
+							$("#modal-opsi-harga").modal("show");
+							}
+						},error:function(){
+							swal({
+								title: "Gagal",
+								text: "Gagal mengambil data",
+								icon: "error",
+								button: "Ok",
+							});
+						}
+					});
             	}
+				// change color row price option selected
+            	function priceOptionSelected(id) {
+            		localStorage.setItem('id_price_option', id);
+					localStorage.setItem('price_option', $(`.priceOption_${id}`).find('td:eq(2)').text());
+            		$(".rowPriceOption").removeAttr("style");
+            		$(".priceOption_" + id).attr("style", "background: rgb(180, 235, 180);");
+            	}
+				// show price option selected to input
+				function movePriceOptionToInput() {
+					if (localStorage.getItem('id_price_option')) {
+						nextProduk();
+						setTimeout(function () {
+							$("#harga_produk").val(localStorage.getItem('price_option'));
+							$("#harga_produk").focus();
+						}, 500);
+						$("#modal-opsi-harga").modal("hide");
+					$("#modalProduk").modal("hide");
+					} else {
+						swal({
+							title: "Opsi Harga Produk",
+							text: "Opsi harga produk belum dipilih",
+							icon: "warning",
+							button: "OK",
+						});
+					}
 
+				 }
             	function getValue(id) {
             		let newId = id;
             		let result = newId.replace(/-/g, "");
@@ -723,6 +789,8 @@ $replace = [" ", "+", "-"];
             				$("#modalProduk").modal("hide");
             				$("#kode_produk").val(response.kode);
             				$("#namaproduk").val(response.nama);
+							$("#harga_produk").val(response.harga);
+							$(".satuan").val(response.satuan);
             				$("#satuan").val(response.satuan);
             			},
             			error: function () {
@@ -735,5 +803,8 @@ $replace = [" ", "+", "-"];
             			}
             		});
             	}
+				// use for add chart
+				function chartAdd() {
 
+				 }
             </script>

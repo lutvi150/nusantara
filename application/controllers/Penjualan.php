@@ -101,5 +101,16 @@ class Penjualan extends CI_Controller
         ];
         echo json_encode($response);
     }
+    // get data in price option
+    public function getPriceOption(Type $var = null)
+    {
+        $kode_produk = $this->input->post('kode_produk');
+        $dataPriceOption = $this->M_app->findData('produk_opsi_harga', 'kode_brg', $kode_produk)->result();
+        $response = [
+            'status' => 'success',
+            'data' => $dataPriceOption,
+        ];
+        echo json_encode($response);
+    }
 
 }
