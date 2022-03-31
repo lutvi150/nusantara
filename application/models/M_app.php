@@ -151,4 +151,31 @@ class M_app extends CI_Model
         $this->db->where($reference, $id);
         return $this->db->get();
     }
+    // use for check produk is exist
+    public function checkProduct($kode_produk, $id_member)
+    {
+        $this->db->from('cart');
+        $this->db->where('kode_produk', $kode_produk);
+        $this->db->where('id_member', $id_member);
+        return $this->db->get()->row();
+    }
+    // store to database
+    public function storeData($table, $object)
+    {
+        $this->db->insert($table, $object);
+    }
+    // get data for cart
+    public function getDataCart($kode_transaksi)
+    {
+        $this->db->from('cart');
+        $this->db->where('kode_transaksi', $kode_transaksi);
+        $this->db->join('produk', 'cart.kode_produk = produk.kode');
+        return $this->db->get()->result();
+    }
+    // use for delete data
+    public function deleteData($table, $reference, $id)
+    {
+        $this->db->where($reference, $id);
+        $this->db->delete($table);
+    }
 }

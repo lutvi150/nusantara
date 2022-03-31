@@ -1,3 +1,8 @@
+            <style>
+            	.text-error {
+            		color: red;
+            	}
+            </style>
             <div class="main-content">
             	<div class="section__content section__content--p30">
             		<div class="container-fluid">
@@ -21,6 +26,8 @@
             														data-target="#modalMember">...</button>
             												</div>
             											</div>
+
+            											<span class="text-error eid_member"></span>
             										</div>
 
             									</div>
@@ -87,6 +94,7 @@
             													data-target="#modalProduk">...</button>
             											</div>
             										</div>
+            										<span class="text-error ekode_produk"></span>
             									</div>
             								</div>
             								<div class="row mb-2">
@@ -112,7 +120,7 @@
             								<div class="row mb-2">
             									<div class="col-4">Satuan</div>
             									<div class="col-8">
-            										<input type="text" id="satuan" class="form-control">
+            										<input type="text" readonly id="satuan" class="form-control">
             									</div>
             								</div>
             								<div class="hr-blue"></div>
@@ -122,11 +130,11 @@
             										<div class="form-inline">
             											<div class="form-group mr-2">P</div>
             											<div class="form-group mr-2"><input type="text"
-            													class="form-control" style="width: 60px;"></div>
+            													class="form-control" id="u_p" style="width: 60px;"></div>
             											<div class="form-group mr-2" style="padding: 0 7px 0 5px;">X
             											</div>
             											<div class="form-group mr-2">L</div>
-            											<div class="form-group mr-2"><input type="text"
+            											<div class="form-group mr-2"><input type="text" id="u_l"
             													class="form-control" style="width: 60px;"></div>
             										</div>
             										<div class="form-check-inline">
@@ -146,11 +154,20 @@
             								<div class="row mb-2">
             									<div class="col-4">Qty</div>
             									<div class="col-8 form-inline">
-            										<div class="form-group mr-2"><input type="text" class="form-control"
-            												style="width: 90px;"></div>
-            										<div class="form-group"><input type="text" readonly class="form-control satuan"
-            												style="width: 94px;"></div>
+            										<div class="form-group mr-2">
+            											<input type="text" id="qty" class="form-control"
+            												style="width: 90px;">
+            										</div>
+            										<div class="form-group">
+            											<input type="text" readonly class="form-control satuan"
+            												style="width: 94px;">
+														</div>
             									</div>
+												<div class="col-md-4"></div>
+												<div class="col-md-8">
+												<span class="text-error eqty"></span>
+												</div>
+
             								</div>
             								<div class="row mb-2">
             									<div class="col-4">Keterangan</div>
@@ -160,7 +177,8 @@
             								</div>
             								<div class="row mb-2">
             									<div class="col-12 text-right">
-            										<button onclick="chartAdd()" type="button" class="btn btn-greylight"><span class="iconify-inline"
+            										<button onclick="chartAdd()" type="button"
+            											class="btn btn-greylight"><span class="iconify-inline"
             												data-icon="fluent:cart-16-regular"
             												style="color: #2196F3; font-weight: 500; margin-right: 5px;">
             											</span>Tambah Ke Keranjang</button>
@@ -173,8 +191,8 @@
             								<div class="row mb-2">
             									<div class="col-4">PPN</div>
             									<div class="col-8 form-inline">
-            										<div class="form-group mr-2"><input type="text" id="" class="form-control"
-            												style="width: 60px;"></div>
+            										<div class="form-group mr-2"><input type="text" id=""
+            												class="form-control" style="width: 60px;"></div>
             										<div class="form-group"><input type="text" class="form-control"
             												style="width: 127px;"></div>
             									</div>
@@ -250,8 +268,8 @@
             								<th></th>
             							</tr>
             						</thead>
-            						<tbody>
-            							<tr>
+            						<tbody class="show-cart">
+            							<tr hidden>
             								<td>No</td>
             								<td>Kode</td>
             								<td>Nama Produk</td>
@@ -267,18 +285,7 @@
             								<td><a href="" class="btn-hapus"><span class="iconify-inline"
             											data-icon="fa6-solid:trash-can"></span></a></td>
             							</tr>
-            							<tr>
-            								<td>No</td>
-            								<td>Kode</td>
-            								<td>Nama Produk</td>
-            								<td>Satuan</td>
-            								<td>Keterangan</td>
-            								<td>Harga</td>
-            								<td>Qty</td>
-            								<td>Subtotal</td>
-            								<td><a href="" class="btn-hapus"><span class="iconify-inline"
-            											data-icon="fa6-solid:trash-can"></span></a></td>
-            							</tr>
+
             						</tbody>
             					</table>
             				</div>
@@ -396,7 +403,8 @@
             							</thead>
             							<tbody>
             								<?php $no = 1;foreach ($data_pending as $dp) {?>
-            								<tr class="row-pending numberRowPending_<?=$dp->faktur?>" onclick="getValueRowPending('<?=$dp->faktur?>')">
+            								<tr class="row-pending numberRowPending_<?=$dp->faktur?>"
+            									onclick="getValueRowPending('<?=$dp->faktur?>')">
             									<td><?=$no++;?></td>
             									<td><?=$dp->faktur;?></td>
             									<td><?=$dp->customer_name;?></td>
@@ -574,17 +582,18 @@ $replace = [" ", "+", "-"];
             						<th>Harga</th>
             					</thead>
             					<tbody id="show-data-opsi-harga">
-									<tr>
-										<td></td>
-										<td></td>
-										<td></td>
-									</tr>
+            						<tr>
+            							<td></td>
+            							<td></td>
+            							<td></td>
+            						</tr>
             					</tbody>
             				</table>
             			</div>
             			<div class="modal-footer">
             				<button type="button" class="btn btn-secondary" data-dismiss="modal">Batalkan</button>
-            				<button type="button" onclick="movePriceOptionToInput()" class="btn btn-primary btn-xs" style="padding: 7x 30px;">Pilih</button>
+            				<button type="button" onclick="movePriceOptionToInput()" class="btn btn-primary btn-xs"
+            					style="padding: 7x 30px;">Pilih</button>
             			</div>
             		</div>
             	</div>
@@ -594,81 +603,84 @@ $replace = [" ", "+", "-"];
             <script>
             	let url = "<?=base_url()?>"
             	showProduk(1);
+				showCart();
             	$(document).ready(function () {
             		$(document).on("click", ".pagination li a", function (event) {
             			event.preventDefault();
             			var page = $(this).data("ci-pagination-page");
             			showProduk(page);
             		});
-					localStorage.clear();
-				});
+            		localStorage.clear();
+            	});
             	// use for show opsi harga produk
             	function showOpsiHarga() {
-					let kode_produk = localStorage.getItem('kode_produk')
-					$.ajax({
-						type: "POST",
-						url: url+"Penjualan/getPriceOption",
-						data: {
-							kode_produk: kode_produk
-						},
-						dataType: "JSON",
-						success: function (response) {
-							if (response.data=="") {
-								swal({
-									title: "Opsi Harga Produk",
-									text: "Opsi harga produk tidak ditemukan",
-									icon: "warning",
-									button: "OK",
-								});
-							} else{
-								let html="";
-								$.each(response.data, function (indexInArray, valueOfElement) {
-									html+=`<tr class="rowPriceOption priceOption_${valueOfElement.id}" onclick="priceOptionSelected(${valueOfElement.id})">
+            		let kode_produk = localStorage.getItem('kode_produk')
+            		$.ajax({
+            			type: "POST",
+            			url: url + "Penjualan/getPriceOption",
+            			data: {
+            				kode_produk: kode_produk
+            			},
+            			dataType: "JSON",
+            			success: function (response) {
+            				if (response.data == "") {
+            					swal({
+            						title: "Opsi Harga Produk",
+            						text: "Opsi harga produk tidak ditemukan",
+            						icon: "warning",
+            						button: "OK",
+            					});
+            				} else {
+            					let html = "";
+            					$.each(response.data, function (indexInArray, valueOfElement) {
+            						html += `<tr class="rowPriceOption priceOption_${valueOfElement.id}" onclick="priceOptionSelected(${valueOfElement.id})">
 										<td>${indexInArray+1}</td>
 										<td>${valueOfElement.jenis_member}</td>
 										<td>${valueOfElement.harga}</td>
 									</tr>`;
-								});
-								$("#show-data-opsi-harga").html(html);
-							$("#modal-opsi-harga").modal("show");
-							}
-						},error:function(){
-							swal({
-								title: "Gagal",
-								text: "Gagal mengambil data",
-								icon: "error",
-								button: "Ok",
-							});
-						}
-					});
+            					});
+            					$("#show-data-opsi-harga").html(html);
+            					$("#modal-opsi-harga").modal("show");
+            				}
+            			},
+            			error: function () {
+            				swal({
+            					title: "Gagal",
+            					text: "Gagal mengambil data",
+            					icon: "error",
+            					button: "Ok",
+            				});
+            			}
+            		});
             	}
-				// change color row price option selected
+            	// change color row price option selected
             	function priceOptionSelected(id) {
             		localStorage.setItem('id_price_option', id);
-					localStorage.setItem('price_option', $(`.priceOption_${id}`).find('td:eq(2)').text());
+            		localStorage.setItem('price_option', $(`.priceOption_${id}`).find('td:eq(2)').text());
             		$(".rowPriceOption").removeAttr("style");
             		$(".priceOption_" + id).attr("style", "background: rgb(180, 235, 180);");
             	}
-				// show price option selected to input
-				function movePriceOptionToInput() {
-					if (localStorage.getItem('id_price_option')) {
-						nextProduk();
-						setTimeout(function () {
-							$("#harga_produk").val(localStorage.getItem('price_option'));
-							$("#harga_produk").focus();
-						}, 500);
-						$("#modal-opsi-harga").modal("hide");
-					$("#modalProduk").modal("hide");
-					} else {
-						swal({
-							title: "Opsi Harga Produk",
-							text: "Opsi harga produk belum dipilih",
-							icon: "warning",
-							button: "OK",
-						});
-					}
+            	// show price option selected to input
+            	function movePriceOptionToInput() {
+            		if (localStorage.getItem('id_price_option')) {
+            			nextProduk();
+            			setTimeout(function () {
+            				$("#harga_produk").val(localStorage.getItem('price_option'));
+            				$("#harga_produk").focus();
+            			}, 500);
+            			$("#modal-opsi-harga").modal("hide");
+            			$("#modalProduk").modal("hide");
+            		} else {
+            			swal({
+            				title: "Opsi Harga Produk",
+            				text: "Opsi harga produk belum dipilih",
+            				icon: "warning",
+            				button: "OK",
+            			});
+            		}
 
-				 }
+            	}
+
             	function getValue(id) {
             		let newId = id;
             		let result = newId.replace(/-/g, "");
@@ -678,11 +690,11 @@ $replace = [" ", "+", "-"];
             		$("#namerow_" + result).attr("style", "background: rgb(180, 235, 180);");
             		checkData(id)
             	}
-				// use for change color row pending
-				function getValueRowPending(faktur) {
-					$(".row-pending").removeAttr("style");
-					$(".numberRowPending_" + faktur).attr("style", "background: rgb(180, 235, 180);");
-				 }
+            	// use for change color row pending
+            	function getValueRowPending(faktur) {
+            		$(".row-pending").removeAttr("style");
+            		$(".numberRowPending_" + faktur).attr("style", "background: rgb(180, 235, 180);");
+            	}
             	// use for reset buyer form
             	function resetBuyerForm() {
             		$("#buyerForm")[0].reset();
@@ -789,8 +801,8 @@ $replace = [" ", "+", "-"];
             				$("#modalProduk").modal("hide");
             				$("#kode_produk").val(response.kode);
             				$("#namaproduk").val(response.nama);
-							$("#harga_produk").val(response.harga);
-							$(".satuan").val(response.satuan);
+            				$("#harga_produk").val(response.harga);
+            				$(".satuan").val(response.satuan);
             				$("#satuan").val(response.satuan);
             			},
             			error: function () {
@@ -803,8 +815,128 @@ $replace = [" ", "+", "-"];
             			}
             		});
             	}
-				// use for add chart
-				function chartAdd() {
+            	// use for add chart
+            	function chartAdd() {
+					$(".text-error").text("");
+            		let data = {
+            			kode_produk: localStorage.getItem('kode_produk'),
+            			qty: $("#qty").val(),
+            			harga: $("#harga_produk").val(),
+            		}
+            		$.ajax({
+            			type: "POST",
+            			url: url + "penjualan/cartAdd",
+            			data: data,
+            			dataType: "JSON",
+            			success: function (response) {
+							if (response.status=='validation_failed') {
+								$(".eid_member").text(response.message.id_member);
+								$(".eqty").text(response.message.qty);
+								$(".ekode_produk").text(response.message.kode_produk);
+							} else if(response.status=='success') {
+								$("#kode_produk").val("");
+								$("#namaproduk").val("");
+								$("#satuan").val("");
+								$("#u_p").val("");
+								$("#u_l").val("");
+								$("#qty").val("");
+								$(".satuan").val("");
+								$("#harga_produk").val("");
+								showCart();
+								swal({
+									title: "Berhasil!",
+									text: "Data berhasil ditambahkan",
+									icon: "success",
+									button: "Ok",
+								});
+							} else if (response.status=='failed') {
+								swal({
+									title: "Gagal!",
+									text: "Produk sudah ada di chart",
+									icon: "error",
+									button: "Ok",
+								});
+							}
+            			},
+            			error: function () {
+            				swal({
+            					title: "Peringatan!",
+            					text: "Server Error",
+            					icon: "warning",
+            					button: "Ok",
+            				});
+            			}
+            		});
+            	}
+				// show cart to table
+				function showCart() {
+					$.ajax({
+						type: "POST",
+						url: url+"penjualan/getCartData",
+						data: {
+							id_member: $("#id_member").val(),
+							kode_transaksi:1,
+						},
+						dataType: "JSON",
+						success: function (response) {
+							if (response.status=='success') {
+								let html="";
+								$.each(response.data, function (indexInArray, valueOfElement) {
+									html+=`<tr class="row_cart_${valueOfElement.id_cart}" >
+            								<td>${indexInArray+1}</td>
+            								<td>${valueOfElement.kode_produk}</td>
+            								<td>${valueOfElement.nama}</td>
+            								<td>${valueOfElement.satuan}</td>
+            								<td>
+            									<span class="editxt">${valueOfElement.keterangan}</span>
+            									<input type="text" class="txtedit" data-id="1" data-field="email"
+            										id="kettxt_1" value="Keterangan">
+            								</td>
+            								<td>${valueOfElement.harga}</td>
+            								<td>${valueOfElement.qty}</td>
+            								<td>${valueOfElement.total_harga}</td>
+            								<td><a href="#" onclick="deleteCart(${valueOfElement.id_cart})" class="btn-hapus"><span class="iconify-inline"
+            											data-icon="fa6-solid:trash-can"></span></a></td>
+            							</tr>`
+								});
+								$(".txtotal").text("RP. "+response.total_harga);
+								$(".show-cart").html(html);
+							}
+						},error:function(){swal({
+            					title: "Peringatan!",
+            					text: "Data produk tidak ditemukan",
+            					icon: "warning",
+            					button: "Ok",
+            				});
+						}
+					});
+				 }
+				//  function delete cart
+				function deleteCart(id_cart) {
+					$.ajax({
+						type: "POST",
+						url: url+"penjualan/deleteCart",
+						data: {id_cart:id_cart},
+						dataType: "JSON",
+						success: function (response) {
+							if (response.status=='success') {
+								swal({
+									title: "Berhasil!",
+									text: "Data berhasil dihapus",
+									icon: "success",
+									button: "Ok",
+								});
+								showCart();
+							}
 
+						},error:function(){
+							swal({
+								title: "Peringatan!",
+								text: "Server Error",
+								icon: "warning",
+								button: "Ok",
+							});
+						}
+					});
 				 }
             </script>

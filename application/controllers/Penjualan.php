@@ -8,6 +8,7 @@ class Penjualan extends CI_Controller
     {
         parent::__construct();
         $this->load->model('M_app');
+        $this->load->library('form_validation');
 
         if (!$this->session->userdata('akun')) {
             redirect(base_url('admin/login'));
@@ -112,5 +113,87 @@ class Penjualan extends CI_Controller
         ];
         echo json_encode($response);
     }
+    // cart add
+    public function cartAdd(Type $var = null)
+    {
+        $this->form_validation->set_rules('kode_produk', 'Kode Produk', 'trim|required', [
+            'required' => 'Kode Produk harus diisi',
+        ]);
+        $this->form_validation->set_rules('qty', 'Qty', 'trim|required', [
+            'required' => 'Qty harus diisi',
+        ]);
+        $this->form_validation->set_rules('harga', 'Harga', 'trim|required', [
+            'required' => 'Harga harus diisi',
+        ]);
+        // $this->form_validation->set_rules('id_member', 'ID Member', 'trim|required', [
+        //     'required' => 'ID Member harus diisi',
+        // ]);
 
+        if ($this->form_validation->run() == false) {
+            $response = [
+                'status' => 'validation_failed',
+                'message' => $this->form_validation->error_array(),
+            ];
+        } else {
+            $kode_produk = $this->input->post('kode_produk');
+            $id_member = $this->input->post('id_member');
+            $checkProduk = $this->M_app->checkProduct($kode_produk, $id_member);
+            $harga = $this->input->post('harga');
+            $qty = $this->input->post('qty');
+
+            if ($checkProduk == null) {
+                $inserCart = [
+                    'kode_transaksi' => 1,
+                    'kode_produk' => $kode_produk,
+                    'id_member' => 1,
+                    'keterangan' => $this->input->post('keterangan'),
+                    'qty' => $qty,
+                    'harga' => $harga,
+                    'total_harga' => $harga * $qty,
+                ];
+                $this->M_app->storeData('cart', $inserCart);
+                $response = [
+                    'status' => 'success',
+                    'message' => 'Produk berhasil ditambahkan ke keranjang',
+                ];
+            } else {
+                $response = [
+                    'status' => 'failed',
+                    'message' => 'Produk sudah ada di keranjang',
+                ];
+            }
+        }
+        echo json_encode($response);
+    }
+    // get cart data
+    public function getCartData(Type $var = null)
+    {
+        $kode_transaksi = $this->input->post('kode_transaksi');
+        $cart = $this->M_app->getDataCart($kode_transaksi);
+        if ($cart != null) {
+            foreach ($cart as $key => $value) {
+                $resultHarga[] = $value->total_harga;
+            }
+            $totalHarga = array_sum($resultHarga);
+        } else {
+            $totalHarga = 0;
+        }
+        $response = [
+            'status' => 'success',
+            'data' => $cart,
+            'total_harga' => $totalHarga,
+        ];
+        echo json_encode($response);
+    }
+    // delete cart data
+    public function deleteCart(Type $var = null)
+    {
+        $id_cart = $this->input->post('id_cart');
+        $this->M_app->deleteData('cart', 'id_cart', $id_cart);
+        $response = [
+            'status' => 'success',
+            'message' => 'Data berhasil dihapus',
+        ];
+        echo json_encode($response);
+    }
 }
