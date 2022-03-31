@@ -196,4 +196,33 @@ class Penjualan extends CI_Controller
         ];
         echo json_encode($response);
     }
+    // use for get data pending
+    public function getDataPending(Type $var = null)
+    {
+        $faktur = $this->input->post('faktur');
+        if ($faktur == null) {
+            $response = [
+                'status' => 'not_fount',
+                'message' => 'Faktur tidak ditemukan',
+            ];
+        } else {
+
+            $jual_produk_pending = $this->M_app->findData('transaksi_jual_produk_pending', 'faktur', $faktur)->result();
+            $transaksi_jual_pending = $this->M_app->findData('transaksi_jual_pending', 'faktur', $faktur)->row();
+            if ($jual_produk_pending !== null) {
+                foreach ($jual_produk_pending as $key => $value) {
+                    $resultHarga[] = $value->subtotal;
+                }
+                $total = array_sum($resultHarga);
+            } else {
+                $total = 0;
+            }
+            $response = [
+                'status' => 'success',
+                'data' => $jual_produk_pending,
+                'transaksi_jual_pending' => $transaksi_jual_pending,
+                'total_harga' => $total,
+            ];}
+        echo json_encode($response);
+    }
 }

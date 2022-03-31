@@ -130,7 +130,8 @@
             										<div class="form-inline">
             											<div class="form-group mr-2">P</div>
             											<div class="form-group mr-2"><input type="text"
-            													class="form-control" id="u_p" style="width: 60px;"></div>
+            													class="form-control" id="u_p" style="width: 60px;">
+            											</div>
             											<div class="form-group mr-2" style="padding: 0 7px 0 5px;">X
             											</div>
             											<div class="form-group mr-2">L</div>
@@ -161,12 +162,12 @@
             										<div class="form-group">
             											<input type="text" readonly class="form-control satuan"
             												style="width: 94px;">
-														</div>
+            										</div>
             									</div>
-												<div class="col-md-4"></div>
-												<div class="col-md-8">
-												<span class="text-error eqty"></span>
-												</div>
+            									<div class="col-md-4"></div>
+            									<div class="col-md-8">
+            										<span class="text-error eqty"></span>
+            									</div>
 
             								</div>
             								<div class="row mb-2">
@@ -381,7 +382,7 @@
             								<button type="button" class="btn btn-batal"
             									style="margin-right: 10px; padding: 7px 20px;"
             									data-dismiss="modal">Batal</button>
-            								<button type="button" class="btn btn-simpan"
+            								<button type="button" onclick="nextDataPending()" class="btn btn-simpan"
             									style="padding: 7px 30px;">Lanjutkan <span class="iconify-inline ml-1"
             										data-icon="akar-icons:arrow-right"></span></button>
             							</div>
@@ -603,7 +604,7 @@ $replace = [" ", "+", "-"];
             <script>
             	let url = "<?=base_url()?>"
             	showProduk(1);
-				showCart();
+            	showCart();
             	$(document).ready(function () {
             		$(document).on("click", ".pagination li a", function (event) {
             			event.preventDefault();
@@ -692,8 +693,63 @@ $replace = [" ", "+", "-"];
             	}
             	// use for change color row pending
             	function getValueRowPending(faktur) {
+            		localStorage.setItem('faktur', faktur);
             		$(".row-pending").removeAttr("style");
             		$(".numberRowPending_" + faktur).attr("style", "background: rgb(180, 235, 180);");
+            	}
+            	// use for process data pending
+            	function nextDataPending() {
+            		let faktur = localStorage.getItem('faktur');
+            		$.ajax({
+            			type: "POST",
+            			url: url + "Penjualan/getDataPending",
+            			data: {
+            				faktur: faktur
+            			},
+            			dataType: "JSON",
+            			success: function (response) {
+            				if (response.data == "not_found") {
+            					swal({
+            						title: "Data Pending",
+            						text: "Data pending tidak ditemukan",
+            						icon: "warning",
+            						button: "OK",
+            					});
+            				} else {
+								$("#nama_member").val(response.transaksi_jual_pending.customer_name);
+								$("#hp").val(response.transaksi_jual_pending.hp);
+								$("#email").val(response.transaksi_jual_pending.mail);
+								let html="";
+								$.each(response.data, function (indexInArray, valueOfElement) {
+									html += `<tr class="row_cart_${valueOfElement.kode_brg}" >
+            								<td>${indexInArray+1}</td>
+            								<td>${valueOfElement.kode_brg}</td>
+            								<td>${valueOfElement.nama_brg}</td>
+            								<td>${valueOfElement.sat}</td>
+            								<td>
+            									<span class="editxt">${valueOfElement.ket}</span>
+            									<input type="text" class="txtedit" data-id="1" data-field="email"
+            										id="kettxt_1" value="Keterangan">
+            								</td>
+            								<td>${valueOfElement.harga_brg}</td>
+            								<td>${valueOfElement.qty}</td>
+            								<td>${valueOfElement.subtotal}</td>
+            								<td><a href="#" onclick="deleteCart(${valueOfElement.kode_brg})" class="btn-hapus"><span class="iconify-inline"
+            											data-icon="fa6-solid:trash-can"></span></a></td>
+            							</tr>`
+								});
+								$(".txtotal").text("RP. " + response.total_harga);
+            					$(".show-cart").html(html);
+            				}
+            			},error:function(){
+							swal({
+								title: "Gagal",
+								text: "Gagal mengambil data",
+								icon: "error",
+								button: "Ok",
+							});
+						}
+            		});
             	}
             	// use for reset buyer form
             	function resetBuyerForm() {
@@ -817,7 +873,7 @@ $replace = [" ", "+", "-"];
             	}
             	// use for add chart
             	function chartAdd() {
-					$(".text-error").text("");
+            		$(".text-error").text("");
             		let data = {
             			kode_produk: localStorage.getItem('kode_produk'),
             			qty: $("#qty").val(),
@@ -829,34 +885,34 @@ $replace = [" ", "+", "-"];
             			data: data,
             			dataType: "JSON",
             			success: function (response) {
-							if (response.status=='validation_failed') {
-								$(".eid_member").text(response.message.id_member);
-								$(".eqty").text(response.message.qty);
-								$(".ekode_produk").text(response.message.kode_produk);
-							} else if(response.status=='success') {
-								$("#kode_produk").val("");
-								$("#namaproduk").val("");
-								$("#satuan").val("");
-								$("#u_p").val("");
-								$("#u_l").val("");
-								$("#qty").val("");
-								$(".satuan").val("");
-								$("#harga_produk").val("");
-								showCart();
-								swal({
-									title: "Berhasil!",
-									text: "Data berhasil ditambahkan",
-									icon: "success",
-									button: "Ok",
-								});
-							} else if (response.status=='failed') {
-								swal({
-									title: "Gagal!",
-									text: "Produk sudah ada di chart",
-									icon: "error",
-									button: "Ok",
-								});
-							}
+            				if (response.status == 'validation_failed') {
+            					$(".eid_member").text(response.message.id_member);
+            					$(".eqty").text(response.message.qty);
+            					$(".ekode_produk").text(response.message.kode_produk);
+            				} else if (response.status == 'success') {
+            					$("#kode_produk").val("");
+            					$("#namaproduk").val("");
+            					$("#satuan").val("");
+            					$("#u_p").val("");
+            					$("#u_l").val("");
+            					$("#qty").val("");
+            					$(".satuan").val("");
+            					$("#harga_produk").val("");
+            					showCart();
+            					swal({
+            						title: "Berhasil!",
+            						text: "Data berhasil ditambahkan",
+            						icon: "success",
+            						button: "Ok",
+            					});
+            				} else if (response.status == 'failed') {
+            					swal({
+            						title: "Gagal!",
+            						text: "Produk sudah ada di chart",
+            						icon: "error",
+            						button: "Ok",
+            					});
+            				}
             			},
             			error: function () {
             				swal({
@@ -868,21 +924,21 @@ $replace = [" ", "+", "-"];
             			}
             		});
             	}
-				// show cart to table
-				function showCart() {
-					$.ajax({
-						type: "POST",
-						url: url+"penjualan/getCartData",
-						data: {
-							id_member: $("#id_member").val(),
-							kode_transaksi:1,
-						},
-						dataType: "JSON",
-						success: function (response) {
-							if (response.status=='success') {
-								let html="";
-								$.each(response.data, function (indexInArray, valueOfElement) {
-									html+=`<tr class="row_cart_${valueOfElement.id_cart}" >
+            	// show cart to table
+            	function showCart() {
+            		$.ajax({
+            			type: "POST",
+            			url: url + "penjualan/getCartData",
+            			data: {
+            				id_member: $("#id_member").val(),
+            				kode_transaksi: 1,
+            			},
+            			dataType: "JSON",
+            			success: function (response) {
+            				if (response.status == 'success') {
+            					let html = "";
+            					$.each(response.data, function (indexInArray, valueOfElement) {
+            						html += `<tr class="row_cart_${valueOfElement.id_cart}" >
             								<td>${indexInArray+1}</td>
             								<td>${valueOfElement.kode_produk}</td>
             								<td>${valueOfElement.nama}</td>
@@ -898,45 +954,50 @@ $replace = [" ", "+", "-"];
             								<td><a href="#" onclick="deleteCart(${valueOfElement.id_cart})" class="btn-hapus"><span class="iconify-inline"
             											data-icon="fa6-solid:trash-can"></span></a></td>
             							</tr>`
-								});
-								$(".txtotal").text("RP. "+response.total_harga);
-								$(".show-cart").html(html);
-							}
-						},error:function(){swal({
+            					});
+            					$(".txtotal").text("RP. " + response.total_harga);
+            					$(".show-cart").html(html);
+            				}
+            			},
+            			error: function () {
+            				swal({
             					title: "Peringatan!",
             					text: "Data produk tidak ditemukan",
             					icon: "warning",
             					button: "Ok",
             				});
-						}
-					});
-				 }
-				//  function delete cart
-				function deleteCart(id_cart) {
-					$.ajax({
-						type: "POST",
-						url: url+"penjualan/deleteCart",
-						data: {id_cart:id_cart},
-						dataType: "JSON",
-						success: function (response) {
-							if (response.status=='success') {
-								swal({
-									title: "Berhasil!",
-									text: "Data berhasil dihapus",
-									icon: "success",
-									button: "Ok",
-								});
-								showCart();
-							}
+            			}
+            		});
+            	}
+            	//  function delete cart
+            	function deleteCart(id_cart) {
+            		$.ajax({
+            			type: "POST",
+            			url: url + "penjualan/deleteCart",
+            			data: {
+            				id_cart: id_cart
+            			},
+            			dataType: "JSON",
+            			success: function (response) {
+            				if (response.status == 'success') {
+            					swal({
+            						title: "Berhasil!",
+            						text: "Data berhasil dihapus",
+            						icon: "success",
+            						button: "Ok",
+            					});
+            					showCart();
+            				}
 
-						},error:function(){
-							swal({
-								title: "Peringatan!",
-								text: "Server Error",
-								icon: "warning",
-								button: "Ok",
-							});
-						}
-					});
-				 }
+            			},
+            			error: function () {
+            				swal({
+            					title: "Peringatan!",
+            					text: "Server Error",
+            					icon: "warning",
+            					button: "Ok",
+            				});
+            			}
+            		});
+            	}
             </script>
