@@ -164,6 +164,12 @@ class M_app extends CI_Model
     {
         $this->db->insert($table, $object);
     }
+    // use for update data to database
+    public function updateData($table, $reference, $id, $object)
+    {
+        $this->db->where($reference, $id);
+        $this->db->update($table, $object);
+    }
     // get data for cart
     public function getDataCart($kode_transaksi)
     {

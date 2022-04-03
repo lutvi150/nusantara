@@ -34,7 +34,7 @@ class Penjualan extends CI_Controller
         $data['id_kategori'] = '';
 
         $this->load->view('template', $data);
-        // echo json_encode($data['data_member']);
+        // echo json_encode($this->session->userdata());
     }
     // use for get data produk
     public function getDataProduk()
@@ -168,17 +168,58 @@ class Penjualan extends CI_Controller
     // cart update
     public function updateCart(Type $var = null)
     {
-        $id_cart = $this->input->post('id_cart');
-        $keterangan = $this->input->post('keterangan');
+        $start = microtime(true);
+        $id_cart = $this->input->post('kode_brg');
+        $keterangan = $this->input->post('ket');
         $qty = $this->input->post('qty');
         $jenisField = $this->input->post('jenis_field');
-        $harga = $this->input->post('harga');
-        $total_harga = $qty * $harga;
+        $harga = $this->input->post('total_harga');
+        $total_harga = (int) $qty * (int) $harga;
+        if ($jenisField == 'cart') {
+            $updateCart = [
+                'qty' => $qty,
+                'keterangan' => $keterangan,
+                'total_harga' => $total_harga,
+            ];
+            $this->M_app->updateData('cart', 'id_cart', $id_cart, $updateCart);
+            $transaksi = $this->M_app->findData('cart', 'id_cart', $id_cart)->row();
+            $cart = $this->M_app->getDataCart($transaksi->kode_transaksi);
+            if ($cart != null) {
+                foreach ($cart as $key => $value) {
+                    $resultHarga[] = $value->total_harga;
+                }
+                $total = array_sum($resultHarga);
+            } else {
+                $total = 0;
+            }
+        } else if ($jenisField == 'pending') {
+            $updateCart = [
+                'qty' => $qty,
+                'ket' => $keterangan,
+                'subtotal' => $total_harga,
+            ];
+            $this->M_app->updateData('transaksi_jual_produk_pending', 'id', $id_cart, $updateCart);
+            // use for count data
+            $checkKodeFaktur = $this->M_app->findData('transaksi_jual_produk_pending', 'id', $id_cart)->row();
+            $jual_produk_pending = $this->M_app->findData('transaksi_jual_produk_pending', 'faktur', $checkKodeFaktur->faktur)->result();
+            if ($jual_produk_pending !== null) {
+                foreach ($jual_produk_pending as $key => $value) {
+                    $resultHarga[] = $value->subtotal;
+                }
+                $total = array_sum($resultHarga);
+            } else {
+                $total = 0;
+            }
+        }
         $response = [
             'status' => 'success',
             'content' => $this->input->post(),
             'total_harga' => $total_harga,
+            'keterangan' => $keterangan,
+            'qty' => $qty,
             'id_cart' => $id_cart,
+            'total_keseluruhan' => $total,
+            'elapsed_time' => microtime(true) - $start,
         ];
         echo json_encode($response);
     }
