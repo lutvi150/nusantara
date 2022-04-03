@@ -165,6 +165,23 @@ class Penjualan extends CI_Controller
         }
         echo json_encode($response);
     }
+    // cart update
+    public function updateCart(Type $var = null)
+    {
+        $id_cart = $this->input->post('id_cart');
+        $keterangan = $this->input->post('keterangan');
+        $qty = $this->input->post('qty');
+        $jenisField = $this->input->post('jenis_field');
+        $harga = $this->input->post('harga');
+        $total_harga = $qty * $harga;
+        $response = [
+            'status' => 'success',
+            'content' => $this->input->post(),
+            'total_harga' => $total_harga,
+            'id_cart' => $id_cart,
+        ];
+        echo json_encode($response);
+    }
     // get cart data
     public function getCartData(Type $var = null)
     {

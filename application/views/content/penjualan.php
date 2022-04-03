@@ -2,11 +2,12 @@
             	.text-error {
             		color: red;
             	}
+
             </style>
             <div class="main-content">
             	<div class="section__content section__content--p30">
             		<div class="container-fluid">
-            			<div class="row">
+            			<div class="row" onclick="editTable(1,false,'')">
             				<div class="col-12"
             					style="font-size: 12px; padding: 15px 15px; background: #FFFFFF; box-shadow: 0px 12px 26px rgba(16, 30, 115, 0.06); border-radius: 20px;">
             					<form>
@@ -173,7 +174,7 @@
             								<div class="row mb-2">
             									<div class="col-4">Keterangan</div>
             									<div class="col-12">
-            										<textarea class="form-control"></textarea>
+            										<textarea class="form-control" id="keterangan"></textarea>
             									</div>
             								</div>
             								<div class="row mb-2">
@@ -546,7 +547,7 @@ $replace = [" ", "+", "-"];
             					</thead>
             					<tbody id="show-data-produk">
             					</tbody>
-            				</table>
+            				</table>5
             				<div class="row">
             					<div class="col-md-6 produk-result-count">
             					</div>
@@ -565,8 +566,8 @@ $replace = [" ", "+", "-"];
             <!-- end modal -->
 
             <!-- Modal modal opsi harga -->
-            <div class="modal fade" id="modal-opsi-harga" tabindex="-1" role="dialog" aria-labelledby="modelTitleId"
-            	aria-hidden="true">
+            <div class="modal fade" id="modal-opsi-harga" style="display: ;" tabindex="-1" role="dialog"
+            	aria-labelledby="modelTitleId" aria-hidden="true">
             	<div class="modal-dialog" role="document">
             		<div class="modal-content">
             			<div class="modal-header">
@@ -716,41 +717,89 @@ $replace = [" ", "+", "-"];
             						button: "OK",
             					});
             				} else {
-								$("#nama_member").val(response.transaksi_jual_pending.customer_name);
-								$("#hp").val(response.transaksi_jual_pending.hp);
-								$("#email").val(response.transaksi_jual_pending.mail);
-								let html="";
-								$.each(response.data, function (indexInArray, valueOfElement) {
-									html += `<tr class="row_cart_${valueOfElement.kode_brg}" >
+            					$("#nama_member").val(response.transaksi_jual_pending.customer_name);
+            					$("#hp").val(response.transaksi_jual_pending.hp);
+            					$("#email").val(response.transaksi_jual_pending.mail);
+            					let html = "";
+            					$.each(response.data, function (indexInArray, valueOfElement) {
+            						html += `<tr class="row_cart_${valueOfElement.kode_brg}"  >
             								<td>${indexInArray+1}</td>
             								<td>${valueOfElement.kode_brg}</td>
             								<td>${valueOfElement.nama_brg}</td>
             								<td>${valueOfElement.sat}</td>
             								<td>
-            									<span class="editxt">${valueOfElement.ket}</span>
-            									<input type="text" class="txtedit" data-id="1" data-field="email"
-            										id="kettxt_1" value="Keterangan">
+            									<span class="editxt_${valueOfElement.kode_brg} show-text" onclick="editTable('${valueOfElement.kode_brg}',true,'ket')" >${valueOfElement.ket}</span>
+            									<textarea type="text" class="form-control edit-text" hidden="true" id="txtedit_${valueOfElement.kode_brg}" onkeyup="updateCart('${valueOfElement.kode_brg}','pending')" onblur="editTable('${valueOfElement.kode_brg}',false)" >${valueOfElement.ket}</textarea>
+
             								</td>
-            								<td>${valueOfElement.harga_brg}</td>
-            								<td>${valueOfElement.qty}</td>
-            								<td>${valueOfElement.subtotal}</td>
+            								<td class="harga_${valueOfElement.kode_brg}">${valueOfElement.harga_brg}</td>
+            								<td><span class="editqty_${valueOfElement.kode_brg} show-text" onclick="editTable('${valueOfElement.kode_brg}',true,'qty')" >${valueOfElement.qty}</span><input type="text" hidden="true" value="${valueOfElement.qty}" onkeyup="updateCart('${valueOfElement.kode_brg}','pending')"  class="form-control input-edit-qty edit-text id-edit-qty-${valueOfElement.kode_brg}" ></td>
+            								<td class="total_harga_${valueOfElement.kode_brg}" >${valueOfElement.subtotal}</td>
             								<td><a href="#" onclick="deleteCart(${valueOfElement.kode_brg})" class="btn-hapus"><span class="iconify-inline"
             											data-icon="fa6-solid:trash-can"></span></a></td>
             							</tr>`
-								});
-								$(".txtotal").text("RP. " + response.total_harga);
+            					});
+            					$(".txtotal").text("RP. " + response.total_harga);
             					$(".show-cart").html(html);
+            					$("#modalPending").modal("hide");
             				}
-            			},error:function(){
+            			},
+            			error: function () {
+            				swal({
+            					title: "Gagal",
+            					text: "Gagal mengambil data",
+            					icon: "error",
+            					button: "Ok",
+            				});
+            			}
+            		});
+            	}
+            	// use for make table can edit by click
+            	function editTable(kode_brg, status, type) {
+					$(".show-text").removeAttr("hidden");
+            			$(".edit-text").attr("hidden", true);
+            		console.log(status);
+            		if (status == true) {
+            			if (type == 'ket') {
+            				$("#txtedit_" + kode_brg).removeAttr("hidden");
+            				$(".editxt_" + kode_brg).attr("hidden", true);
+            			} else if(type=='qty'){
+							$(".editqty_" + kode_brg).attr("hidden", true);
+							$(".id-edit-qty-"+kode_brg).removeAttr("hidden");
+						}
+            		} else {
+            			$(".show-text").removeAttr("hidden");
+            			$(".edit-text").attr("hidden", true);
+            		}
+            	}
+				// use for update data when click edit on table
+				function updateCart(kode_brg,jenis_field) {
+					$.ajax({
+						type: "POST",
+						url: url+"penjualan/updateCart",
+						data: {
+							kode_brg: kode_brg,
+							qty: $(".id-edit-qty-"+kode_brg).val(),
+							ket: $("#txtedit_" + kode_brg).val(),
+							jenis_field:jenis_field,
+							total_harga:$(".harga"+kode_brg).text(),
+						},
+						dataType: "JSON",
+						success: function (response) {
+							if (response.status=='success') {
+								$(".total_harga_"+response.id_cart).text(response.total_harga);
+							}
+
+						},error:function(){
 							swal({
 								title: "Gagal",
-								text: "Gagal mengambil data",
+								text: "Nilai Tidak Sesuai Kriteria Sistem",
 								icon: "error",
 								button: "Ok",
 							});
 						}
-            		});
-            	}
+					});
+				}
             	// use for reset buyer form
             	function resetBuyerForm() {
             		$("#buyerForm")[0].reset();
@@ -878,6 +927,7 @@ $replace = [" ", "+", "-"];
             			kode_produk: localStorage.getItem('kode_produk'),
             			qty: $("#qty").val(),
             			harga: $("#harga_produk").val(),
+						keterangan:$("#keterangan").val(),
             		}
             		$.ajax({
             			type: "POST",
@@ -943,14 +993,14 @@ $replace = [" ", "+", "-"];
             								<td>${valueOfElement.kode_produk}</td>
             								<td>${valueOfElement.nama}</td>
             								<td>${valueOfElement.satuan}</td>
-            								<td>
-            									<span class="editxt">${valueOfElement.keterangan}</span>
-            									<input type="text" class="txtedit" data-id="1" data-field="email"
-            										id="kettxt_1" value="Keterangan">
+											<td>
+            									<span class="editxt_${valueOfElement.id_cart} show-text" onclick="editTable('${valueOfElement.id_cart}',true,'ket')" >${valueOfElement.keterangan}</span>
+            									<textarea type="text" class="form-control edit-text" hidden="true" id="txtedit_${valueOfElement.id_cart}" onkeyup="updateCart('${valueOfElement.id_cart}','cart')" onblur="editTable('${valueOfElement.id_cart}',false)" >${valueOfElement.keterangan}</textarea>
+
             								</td>
-            								<td>${valueOfElement.harga}</td>
-            								<td>${valueOfElement.qty}</td>
-            								<td>${valueOfElement.total_harga}</td>
+            								<td class="harga_${valueOfElement.id_cart}">${valueOfElement.harga}</td>
+            								<td><span class="editqty_${valueOfElement.id_cart} show-text" onclick="editTable('${valueOfElement.id_cart}',true,'qty')" >${valueOfElement.qty}</span><input type="text" hidden="true" value="${valueOfElement.qty}"  class="form-control input-edit-qty edit-text id-edit-qty-${valueOfElement.id_cart}"  onkeyup="updateCart('${valueOfElement.id_cart}','cart')" ></td>
+            								<td class="total_harga_${valueOfElement.id_cart}" >${valueOfElement.total_harga}</td>
             								<td><a href="#" onclick="deleteCart(${valueOfElement.id_cart})" class="btn-hapus"><span class="iconify-inline"
             											data-icon="fa6-solid:trash-can"></span></a></td>
             							</tr>`
@@ -1000,4 +1050,5 @@ $replace = [" ", "+", "-"];
             			}
             		});
             	}
+
             </script>
