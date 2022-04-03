@@ -344,7 +344,7 @@
             						<div class="col-6"><button type="button" class="btn btn-block btn-terang"
             								style="margin-right: 10px; padding: 7px 20px;"
             								data-dismiss="modal">Batalkan</button></div>
-            						<div class="col-6"><button type="button" class="btn btn-block btn-simpan"
+            						<div class="col-6"><button type="button" onclick="processTransaction()" class="btn btn-block btn-simpan"
             								style="padding: 7px 30px;">Lanjutkan</button></div>
             					</div>
             				</form>
@@ -1053,5 +1053,34 @@ $replace = [" ", "+", "-"];
             			}
             		});
             	}
+				// process transaction
+				function processTransaction() {
+					$.ajax({
+						type: "POST",
+						url: url+"penjualan/transactionProcess",
+						data: "data",
+						dataType: "JSON",
+						success: function (response) {
+							if (response.status=='success') {
+								swal({
+            						title: "Berhasil!",
+            						text: "Transaksi Berhasil",
+            						icon: "success",
+            						button: "Ok",
+            					});
+								$("#modalBayar").modal("hide");
+								$(".show-cart").html('');
+								$(".txtotal").text("RP. 0");
+							}
 
+						},error:function(){
+							swal({
+            					title: "Peringatan!",
+            					text: "Server Error",
+            					icon: "warning",
+            					button: "Ok",
+            				});
+						}
+					});
+				 }
             </script>

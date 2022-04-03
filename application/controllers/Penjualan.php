@@ -223,6 +223,39 @@ class Penjualan extends CI_Controller
         ];
         echo json_encode($response);
     }
+    // process transaction
+    public function transactionProcess(Type $var = null)
+    {
+        $costumer_id = $this->input->post('costumer_id');
+        $costumer_name = $this->input->post('costumer_name');
+        $beli_produk = [
+            'faktur' => '',
+            'tgl' => date('Y-m-d'),
+            'jam' => date('H:i:s'),
+            'kasir' => $this->session->userdata('nama'),
+            'costumer_id' => $costumer_id,
+            'total_harga' => 0,
+            'j_item' => 0,
+            'j_produk' => 0,
+            'diskon' => 0.00,
+            'pc' => 'Counter 1',
+            'bayara' => 0,
+            'kembali' => 0,
+            'dp' => 0,
+            'sisa' => 0,
+            'jenis' => 1,
+            'jumlah_terkahir' => 0,
+            'ket' => 'Lunas',
+            'tgl_tempo' => date('H:i:s'),
+            'metode' => 'Cash',
+            'lokasi' => 'Pusat',
+        ];
+        $this->db->truncate('cart');
+        $response = [
+            'status' => 'success',
+        ];
+        echo json_encode($response);
+    }
     // get cart data
     public function getCartData(Type $var = null)
     {
