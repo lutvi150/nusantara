@@ -1,4 +1,5 @@
 <?php
+
 defined('BASEPATH') or exit('No direct script access allowed');
 
 class Penjualan extends CI_Controller
@@ -32,7 +33,8 @@ class Penjualan extends CI_Controller
         $data['data_pending'] = $this->M_app->data_pending();
         $data['dd_kategori'] = $this->M_app->dropdown_pilih_bank();
         $data['id_kategori'] = '';
-
+        // use for delete data user by kasir
+        $this->M_app->deleteData('cart', 'kasir', $this->session->userdata('nama'));
         $this->load->view('template', $data);
         // echo json_encode($this->session->userdata());
     }
@@ -149,6 +151,7 @@ class Penjualan extends CI_Controller
                     'keterangan' => $this->input->post('keterangan'),
                     'qty' => $qty,
                     'harga' => $harga,
+                    'kasir' => $this->session->userdata('nama'),
                     'total_harga' => $harga * $qty,
                 ];
                 $this->M_app->storeData('cart', $inserCart);
@@ -226,35 +229,119 @@ class Penjualan extends CI_Controller
     // process transaction
     public function transactionProcess(Type $var = null)
     {
+        $this->form_validation->set_rules('bayar', 'Bayar', 'trim|required|numeric', [
+            'required' => 'Bayar Tidak Boleh kosong',
+            'numeric' => 'Bayar Harus Berupa Angka',
+        ]);
+        $this->form_validation->set_rules('jenis', 'fieldlabel', 'trim|required|min_length[5]|max_length[12]');
+
         $costumer_id = $this->input->post('costumer_id');
         $costumer_name = $this->input->post('costumer_name');
-        $beli_produk = [
-            'faktur' => '',
+        $total_harga = $this->input->post('total_harga');
+        $jenis = $this->input->post('jenis');
+        $kasir = $this->session->userdata('nama');
+        $transaksi_jual = [
+            'faktur' => $this->makeFaktur(),
             'tgl' => date('Y-m-d'),
             'jam' => date('H:i:s'),
-            'kasir' => $this->session->userdata('nama'),
+            'kasir' => $kasir,
             'costumer_id' => $costumer_id,
-            'total_harga' => 0,
-            'j_item' => 0,
-            'j_produk' => 0,
-            'diskon' => 0.00,
-            'pc' => 'Counter 1',
-            'bayara' => 0,
-            'kembali' => 0,
+            'costumer_name' => $costumer_name,
+            'total_harga' => $total_harga,
+            'bayar' => $this->input->post('bayar'),
+            'kembali' => $this->input->post('kembali'),
             'dp' => 0,
             'sisa' => 0,
-            'jenis' => 1,
-            'jumlah_terkahir' => 0,
-            'ket' => 'Lunas',
-            'tgl_tempo' => date('H:i:s'),
-            'metode' => 'Cash',
-            'lokasi' => 'Pusat',
+            'j_item' => 0,
+            'j_produk' => 0,
+            'keterangan' => 0,
+            'hp' => 0,
+            'untung' => 0,
+            'diskon' => 0,
+            'ppn' => 0,
+            'total_hpp' => 0,
+            'tgl_ambil' => 0,
+            'prioritas' => 0,
+            'status' => '',
+            'pc' => 0,
+            'ket' => '',
+            'jenis' => '',
+            'tgl_bayar' => '',
+            'angsuran' => '',
+            'jumlah_terakhir' => 0,
+            'metode' => 0,
+            'alamat' => '',
+            'pengirim' => 0,
+            'kurir' => 0,
+            'nopol' => 0,
+            'mail' => 0,
+            'tgl_kirim' => 0,
+            'op_cs' => 0,
+            'kredit_poin' => 0,
+            'lokasi' => 0,
+            'tgl_tempo' => 0,
+            'id_auto' => 0,
+            'pajak_bank' => 0,
         ];
-        $this->db->truncate('cart');
-        $response = [
-            'status' => 'success',
-        ];
+        if ($jenis == 'cart') {
+            $cart = $this->M_app->getDataCartByKasir($kasir);
+            if ($cart == null) {
+                $response = [
+                    'status' => 'chart emty',
+                    'msg' => 'Keranjang belanjang kosong',
+                ];
+            } else {
+                foreach ($cart as $key => $value) {
+                    $transaksi_jual_produk[] = [
+                        'faktur' => 0,
+                        'kode_brg' => 0,
+                        'nama_brg' => 0,
+                        'qty' => 0,
+                        'harga_brg' => 0,
+                        'size' => 0,
+                        'luas' => 0,
+                        'disc' => 0,
+                        'subtotal' => 0,
+                        'ket' => 0,
+                        'rincian' => 0,
+                        'subtotal_hpp' => 0,
+                        'sat' => 0,
+                        'hitstat' => 0,
+                        'bahan' => 0,
+                        'bagian' => 0,
+                        'p' => 0,
+                        'l' => 0,
+                        'hgnormal' => 0,
+                        'ketegori' => 0,
+                        'tambahan' => 0,
+                        'dikirim' => 0,
+                        'sisakirim' => 0,
+                        'packing' => 0,
+                        'ket_kirim' => 0,
+                        'status' => 0,
+                        'op_mesin' => 0,
+                        'op_desain' => 0,
+                        'mesin' => 0,
+                        'customer_id' => 0,
+                        'customer_nama' => 0,
+                        'lampiran' => 0,
+                    ];
+                }
+            }
+            $response = [
+                'status' => 'success',
+                'transaksi_jual' => $transaksi_jual,
+                'transaksi_jual_produk' => $transaksi_jual_produk,
+            ];
+        }
         echo json_encode($response);
+    }
+    // use for make faktur
+    public function makeFaktur(Type $var = null)
+    {
+        $kode = "NKL";
+        $lastFakturNumber = $this->M_app->getLastFakturNumber()->faktur;
+        return $lastFakturNumber;
     }
     // get cart data
     public function getCartData(Type $var = null)

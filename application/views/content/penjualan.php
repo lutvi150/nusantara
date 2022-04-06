@@ -320,11 +320,12 @@
             					</div>
             					<div class="row form-group" style="margin-bottom: 10px;">
             						<div class="col-4"><label>Bayar</label></div>
-            						<div class="col-6"><input type="number" class="form-control"></div>
+            						<div class="col-6"><input type="number" onkeypress="priceBack()"
+            								class="form-control bayar"></div>
             					</div>
             					<div class="row form-group" style="margin-bottom: 10px;">
             						<div class="col-4"><label>Kembali</label></div>
-            						<div class="col-6"><input type="number" class="form-control"></div>
+            						<div class="col-6"><input readonly type="number" class="form-control kembali"></div>
             					</div>
             					<div class="hr-blue"></div>
             					<div class="row mb-2">
@@ -344,7 +345,8 @@
             						<div class="col-6"><button type="button" class="btn btn-block btn-terang"
             								style="margin-right: 10px; padding: 7px 20px;"
             								data-dismiss="modal">Batalkan</button></div>
-            						<div class="col-6"><button type="button" onclick="processTransaction()" class="btn btn-block btn-simpan"
+            						<div class="col-6"><button type="button" onclick="processTransaction()"
+            								class="btn btn-block btn-simpan"
             								style="padding: 7px 30px;">Lanjutkan</button></div>
             					</div>
             				</form>
@@ -742,6 +744,8 @@ $replace = [" ", "+", "-"];
             					$(".txtotal").text("RP. " + response.total_harga);
             					$(".show-cart").html(html);
             					$("#modalPending").modal("hide");
+            					// use for store total price to localstorage
+            					localStorage.setItem('total_harga', response.total_harga);
             				}
             			},
             			error: function () {
@@ -756,53 +760,54 @@ $replace = [" ", "+", "-"];
             	}
             	// use for make table can edit by click
             	function editTable(kode_brg, status, type) {
-					$(".show-text").removeAttr("hidden");
-            			$(".edit-text").attr("hidden", true);
+            		$(".show-text").removeAttr("hidden");
+            		$(".edit-text").attr("hidden", true);
             		console.log(status);
             		if (status == true) {
             			if (type == 'ket') {
             				$("#txtedit_" + kode_brg).removeAttr("hidden");
             				$(".editxt_" + kode_brg).attr("hidden", true);
-            			} else if(type=='qty'){
-							$(".editqty_" + kode_brg).attr("hidden", true);
-							$(".id-edit-qty-"+kode_brg).removeAttr("hidden");
-						}
+            			} else if (type == 'qty') {
+            				$(".editqty_" + kode_brg).attr("hidden", true);
+            				$(".id-edit-qty-" + kode_brg).removeAttr("hidden");
+            			}
             		} else {
             			$(".show-text").removeAttr("hidden");
             			$(".edit-text").attr("hidden", true);
             		}
             	}
-				// use for update data when click edit on table
-				function updateCart(kode_brg,jenis_field) {
-					$.ajax({
-						type: "POST",
-						url: url+"penjualan/updateCart",
-						data: {
-							kode_brg: kode_brg,
-							qty: $(".id-edit-qty-"+kode_brg).val(),
-							ket: $("#txtedit_" + kode_brg).val(),
-							jenis_field:jenis_field,
-							total_harga:$(".harga_"+kode_brg).text(),
-						},
-						dataType: "JSON",
-						success: function (response) {
-							if (response.status=='success') {
-								$(".total_harga_"+response.id_cart).text(response.total_harga);
-								$(".editxt_"+response.id_cart).text(response.keterangan);
-								$(".editqty_"+response.id_cart).text(response.qty);
-								$(".txtotal").text("Rp. "+response.total_keseluruhan);
-							}
+            	// use for update data when click edit on table
+            	function updateCart(kode_brg, jenis_field) {
+            		$.ajax({
+            			type: "POST",
+            			url: url + "penjualan/updateCart",
+            			data: {
+            				kode_brg: kode_brg,
+            				qty: $(".id-edit-qty-" + kode_brg).val(),
+            				ket: $("#txtedit_" + kode_brg).val(),
+            				jenis_field: jenis_field,
+            				total_harga: $(".harga_" + kode_brg).text(),
+            			},
+            			dataType: "JSON",
+            			success: function (response) {
+            				if (response.status == 'success') {
+            					$(".total_harga_" + response.id_cart).text(response.total_harga);
+            					$(".editxt_" + response.id_cart).text(response.keterangan);
+            					$(".editqty_" + response.id_cart).text(response.qty);
+            					$(".txtotal").text("Rp. " + response.total_keseluruhan);
+            				}
 
-						},error:function(){
-							swal({
-								title: "Gagal",
-								text: "Nilai Tidak Sesuai Kriteria Sistem",
-								icon: "error",
-								button: "Ok",
-							});
-						}
-					});
-				}
+            			},
+            			error: function () {
+            				swal({
+            					title: "Gagal",
+            					text: "Nilai Tidak Sesuai Kriteria Sistem",
+            					icon: "error",
+            					button: "Ok",
+            				});
+            			}
+            		});
+            	}
             	// use for reset buyer form
             	function resetBuyerForm() {
             		$("#buyerForm")[0].reset();
@@ -930,7 +935,7 @@ $replace = [" ", "+", "-"];
             			kode_produk: localStorage.getItem('kode_produk'),
             			qty: $("#qty").val(),
             			harga: $("#harga_produk").val(),
-						keterangan:$("#keterangan").val(),
+            			keterangan: $("#keterangan").val(),
             		}
             		$.ajax({
             			type: "POST",
@@ -1010,6 +1015,8 @@ $replace = [" ", "+", "-"];
             					});
             					$(".txtotal").text("RP. " + response.total_harga);
             					$(".show-cart").html(html);
+            					// use for add total to localstorage
+            					localStorage.setItem('total_harga', response.total_harga);
             				}
             			},
             			error: function () {
@@ -1053,34 +1060,53 @@ $replace = [" ", "+", "-"];
             			}
             		});
             	}
-				// process transaction
-				function processTransaction() {
-					$.ajax({
-						type: "POST",
-						url: url+"penjualan/transactionProcess",
-						data: "data",
-						dataType: "JSON",
-						success: function (response) {
-							if (response.status=='success') {
-								swal({
+            	// process transaction
+            	function processTransaction() {
+            		let bayar = $(".bayar").val();
+            		let kembali = $(".kembali").val();
+            		let bayar_non_tunai = $("#kategori").children("option:selected").val();
+            		let total_harga = localStorage.getItem('total_harga');
+            		$.ajax({
+            			type: "POST",
+            			url: url + "penjualan/transactionProcess",
+            			data: {
+            				bayar: bayar,
+            				kembali: kembali,
+            				bayar_non_tunai: bayar_non_tunai,
+            				total_harga: total_harga,
+							costumer_name:$("#nama_member").val()
+            			},
+            			dataType: "JSON",
+            			success: function (response) {
+            				if (response.status == 'success') {
+            					swal({
             						title: "Berhasil!",
             						text: "Transaksi Berhasil",
             						icon: "success",
             						button: "Ok",
             					});
-								$("#modalBayar").modal("hide");
-								$(".show-cart").html('');
-								$(".txtotal").text("RP. 0");
-							}
+            					$("#modalBayar").modal("hide");
+            					$(".show-cart").html('');
+            					$(".txtotal").text("RP. 0");
+            				}
 
-						},error:function(){
-							swal({
+            			},
+            			error: function () {
+            				swal({
             					title: "Peringatan!",
             					text: "Server Error",
             					icon: "warning",
             					button: "Ok",
             				});
-						}
-					});
-				 }
+            			}
+            		});
+            	}
+            	//  count price back after pay
+            	function priceBack() {
+            		let bayar = $(".bayar").val();
+            		let total_harga = localStorage.getItem('total_harga');
+            		let backPrice = parseInt(bayar) - parseInt(total_harga);
+            		$(".kembali").val(backPrice)
+            	}
+
             </script>

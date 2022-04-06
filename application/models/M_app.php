@@ -170,6 +170,7 @@ class M_app extends CI_Model
         $this->db->where($reference, $id);
         $this->db->update($table, $object);
     }
+    // use get data cart by
     // get data for cart
     public function getDataCart($kode_transaksi)
     {
@@ -183,5 +184,23 @@ class M_app extends CI_Model
     {
         $this->db->where($reference, $id);
         $this->db->delete($table);
+    }
+    // use get data cart by kasir
+    public function getDataCartByKasir($kasir)
+    {
+        $this->db->from('cart');
+        $this->db->where('kasir', $kasir);
+        $this->db->join('produk', 'cart.kode_produk = produk.kode');
+        return $this->db->get()->result();
+
+    }
+    // use for get last faktur number
+    public function getLastFakturNumber(Type $var = null)
+    {
+        $this->db->from('transaksi_jual');
+        $this->db->limit(1);
+        $this->db->order_by('faktur', 'desc');
+        return $this->db->get()->row();
+
     }
 }
