@@ -1060,6 +1060,7 @@ $replace = [" ", "+", "-"];
             			}
             		});
             	}
+				// 
             	// process transaction
             	function processTransaction() {
             		let bayar = $(".bayar").val();

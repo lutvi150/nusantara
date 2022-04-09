@@ -363,6 +363,10 @@ class Penjualan extends CI_Controller
         ];
         echo json_encode($response);
     }
+    // use for delete
+    public function deleteCartdata(Type $var = null)
+    {
+    }
     // delete cart data
     public function deleteCart(Type $var = null)
     {
