@@ -29,6 +29,12 @@ class Nota extends CI_Controller
                 'customer_name' => $transaction->customer_name,
                 'hp' => $transaction->hp,
                 'tgl_tempo' => $transaction->tgl_tempo,
+                'title' => 'Penjualan',
+                'head' => 'layout/head',
+                'menu' => 'layout/menu',
+                'body' => 'content/penjualan',
+                'foot' => 'layout/foot',
+                'lokasi' => $this->session->userdata('lokasi'),
             ];
             $this->load->view('nota', $response, false);
             // echo $response;
