@@ -131,18 +131,55 @@ class M_app extends CI_Model
         return $this->db->get()->row();
 
     }
+// use for pagination product
 
-    public function pagination_data($limit, $start, $table)
+    public function pagination_data_product($limit, $start, $table, $jenis, $filter)
     {
+        $this->db->from($table);
+        if ($jenis !== "Semua") {
+            $this->db->where('kategori', $jenis);
+        }
+        if ($filter !== null) {
+            $this->db->like('nama', $filter);
+            $this->db->or_like('kode', $filter);
+        }
         $this->db->limit($limit, $start);
-        $query = $this->db->get($this->db->dbprefix . $table);
-        return $query->result_array();
+        return $this->db->get()->result();
+
     }
 
-    public function pagination_total_rows($table)
+    public function pagination_total_rows_product($table, $jenis, $filter)
     {
-        $query = $this->db->get($this->db->dbprefix . $table);
-        return $query->num_rows();
+        $this->db->from($table);
+        if ($jenis !== "Semua") {
+            $this->db->where('kategori', $jenis);
+        }
+
+        if ($filter !== null) {
+            $this->db->like('nama', $filter);
+            $this->db->or_like('kode', $filter);
+        }
+        return $this->db->count_all_results();
+
+    }
+    // end pagination product
+    public function pagination_data($limit, $start, $table)
+    {
+        $this->db->from($table);
+        if ($jenis !== "Semua") {
+            $this->db->where('', $Value);
+
+        }
+        $this->db->limit($limit, $start);
+        return $this->db->get()->result();
+
+    }
+
+    public function pagination_total_rows($table, $jenis)
+    {
+        $this->db->from($table);
+        return $this->db->count_all_results();
+
     }
     // use for find specific data
     public function findData($table, $reference, $id)
@@ -163,6 +200,11 @@ class M_app extends CI_Model
     public function storeData($table, $object)
     {
         $this->db->insert($table, $object);
+    }
+    // use for insert bacth data
+    public function storeBacthData($table, $object)
+    {
+        $this->db->insert_batch($table, $object);
     }
     // use for update data to database
     public function updateData($table, $reference, $id, $object)
@@ -195,10 +237,11 @@ class M_app extends CI_Model
 
     }
     // use for get last faktur number
-    public function getLastFakturNumber(Type $var = null)
+    public function getLastFakturNumber($firstCode)
     {
         $this->db->from('transaksi_jual');
         $this->db->limit(1);
+        $this->db->like('faktur', $firstCode);
         $this->db->order_by('faktur', 'desc');
         return $this->db->get()->row();
 

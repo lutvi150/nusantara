@@ -20,7 +20,7 @@
             										<div class="col-4">ID Member</div>
             										<div class="col-8">
             											<div class="input-group">
-            												<input type="text" class="form-control">
+            												<input type="text" id="id_member" class="form-control">
             												<div class="input-group-append">
             													<button type="button" class="btn btn-group-grey"
             														data-toggle="modal"
@@ -310,35 +310,59 @@
             			<div class="modal-body">
             				<form class="form" style="padding-left: 20px; padding-right: 20px;">
             					<div class="row form-group" style="margin-bottom: 10px;">
-            						<div class="col-4"><label class="form-check-label"><input type="checkbox"
-            									class="form-check-input" value=""> Bayar Tempo</label></div>
-            						<div class="col-6"><input type="date" class="form-control"></div>
+            						<div class="col-4">
+            							<label class="form-check-label">
+            								<input type="checkbox" class="form-check-input" value=""> Bayar
+            								Tempo</label>
+            						</div>
+            						<div class="col-6">
+            							<input type="date" class="form-control">
+            						</div>
             					</div>
             					<div class="row form-group" style="margin-bottom: 10px;">
-            						<div class="col-4"><label>DP</label></div>
-            						<div class="col-6"><input type="number" class="form-control"></div>
+            						<div class="col-4">
+            							<label>DP</label>
+            						</div>
+            						<div class="col-6">
+            							<input type="number" class="form-control">
+            						</div>
             					</div>
             					<div class="row form-group" style="margin-bottom: 10px;">
-            						<div class="col-4"><label>Bayar</label></div>
-            						<div class="col-6"><input type="number" onkeypress="priceBack()"
-            								class="form-control bayar"></div>
+            						<div class="col-4">
+            							<label>Bayar</label>
+            						</div>
+            						<div class="col-6">
+            							<input type="number" onkeypress="priceBack()" class="form-control bayar">
+										<span class="text-error ebayar"></span>
+            						</div>
             					</div>
             					<div class="row form-group" style="margin-bottom: 10px;">
-            						<div class="col-4"><label>Kembali</label></div>
-            						<div class="col-6"><input readonly type="number" class="form-control kembali"></div>
+            						<div class="col-4">
+            							<label>Kembali</label>
+            						</div>
+            						<div class="col-6">
+            							<input readonly type="number" class="form-control kembali">
+            						</div>
             					</div>
             					<div class="hr-blue"></div>
             					<div class="row mb-2">
-            						<div class="col-12"><label class="form-check-label"><input type="radio"
-            									class="form-check-input" id="tunai" name="jenis" value="Cash">Bayar
-            								Tunai (Cash)</label></div>
+            						<div class="col-12">
+            							<label class="form-check-label">
+            								<input type="radio" onclick="enBtnTypePayment(true)" class="form-check-input type-payment" id="tunai" name="jenis"
+            									value="Cash">BayarTunai (Cash)
+            							</label>
+            						</div>
             					</div>
             					<div class="row mb-4">
-            						<div class="col-12"><label class="form-check-label"><input type="radio"
-            									class="form-check-input" id="nontunai" name="jenis"
-            									value="Non Tunai">Bayar Non Tunai</label></div>
+            						<div class="col-12">
+            							<label class="form-check-label">
+            								<input type="radio" class="form-check-input type-payment" onclick="enBtnTypePayment(false)"  id="nontunai" name="jenis"
+            									value="Non Tunai">Bayar Non Tunai
+            							</label>
+            						</div>
             						<div class="col-12">
             							<?php echo form_dropdown('id_kategori', $dd_kategori, $id_kategori, ' id="id_kategori" required class="form-control" disabled'); ?>
+								<span class="text-error ejenis_pembayaran"></span>
             						</div>
             					</div>
             					<div class="row">
@@ -499,7 +523,7 @@ $replace = [" ", "+", "-"];
             				<div class="row form-group">
             					<div class="col-2">
             						Tampilkan
-            						<select class="form-control">
+            						<select class="form-control" id="select-tampilkan" onchange="showProduk(1)">
             							<option value="Semua">Semua</option>
             							<option value="NGPS">NGPS</option>
             							<option value="NKPS">NKPS</option>
@@ -508,7 +532,7 @@ $replace = [" ", "+", "-"];
             					<div class="col-4">
             						Cari
             						<div class="input-group mb-3">
-            							<input type="text" class="form-control" style="border-right: 0;">
+            							<input type="text" class="form-control" onkeyup="showProduk(1)" id="search-produk" style="border-right: 0;">
             							<div class="input-group-append">
             								<button class="btn btn-sm btn-search"><span class="iconify-inline"
             										data-icon="akar-icons:search"></span></button>
@@ -627,15 +651,7 @@ $replace = [" ", "+", "-"];
             			},
             			dataType: "JSON",
             			success: function (response) {
-            				if (response.data == "") {
-            					swal({
-            						title: "Opsi Harga Produk",
-            						text: "Opsi harga produk tidak ditemukan",
-            						icon: "warning",
-            						button: "OK",
-            					});
-            				} else {
-            					let html = "";
+							let html = "";
             					$.each(response.data, function (indexInArray, valueOfElement) {
             						html += `<tr class="rowPriceOption priceOption_${valueOfElement.id}" onclick="priceOptionSelected(${valueOfElement.id})">
 										<td>${indexInArray+1}</td>
@@ -645,7 +661,6 @@ $replace = [" ", "+", "-"];
             					});
             					$("#show-data-opsi-harga").html(html);
             					$("#modal-opsi-harga").modal("show");
-            				}
             			},
             			error: function () {
             				swal({
@@ -746,6 +761,9 @@ $replace = [" ", "+", "-"];
             					$("#modalPending").modal("hide");
             					// use for store total price to localstorage
             					localStorage.setItem('total_harga', response.total_harga);
+								localStorage.setItem('jenis','pending');
+								// save faktur to local
+								localStorage.setItem('faktur',response.transaksi_jual_pending.faktur);
             				}
             			},
             			error: function () {
@@ -823,6 +841,7 @@ $replace = [" ", "+", "-"];
             			},
             			dataType: "JSON",
             			success: function (response) {
+							$("#id_member").val(response.data.id);
             				$("#nama_member").val(response.data.nama);
             				$("#alamat").val(response.data.alamat);
             				$("#hp").val(response.data.hp);
@@ -848,9 +867,12 @@ $replace = [" ", "+", "-"];
             	}
             	//   use for show data produk to modal
             	function showProduk(page) {
+					let filter=$("#search-produk").val();
+					let jenis=$("#select-tampilkan").children("option:selected").val();
             		$.ajax({
-            			type: "GET",
+            			type: "POST",
             			url: url + "Penjualan/getDataProduk/" + page,
+						data:{jenis:jenis,filter:filter},
             			dataType: "JSON",
             			success: function (response) {
             				let table = "";
@@ -1017,6 +1039,8 @@ $replace = [" ", "+", "-"];
             					$(".show-cart").html(html);
             					// use for add total to localstorage
             					localStorage.setItem('total_harga', response.total_harga);
+								// use for add type of chart
+								localStorage.setItem('jenis','cart');
             				}
             			},
             			error: function () {
@@ -1060,22 +1084,39 @@ $replace = [" ", "+", "-"];
             			}
             		});
             	}
-				// 
+            	// use for enable and disable btn slect category
+				function enBtnTypePayment(status) {
+					if (status==true) {
+						console.log('disab;ed');
+						$("#id_kategori").attr("disabled",true);
+					} else{
+						$("#id_kategori").removeAttr("disabled");
+					}
+				 }
             	// process transaction
             	function processTransaction() {
+					$(".text-error").text("");
             		let bayar = $(".bayar").val();
             		let kembali = $(".kembali").val();
             		let bayar_non_tunai = $("#kategori").children("option:selected").val();
+					let jenis_pembayaran=$(".type-payment:checked").val();
+					let id_member=$("#id_member").val();
             		let total_harga = localStorage.getItem('total_harga');
+					let no_hp=$("#hp").val();
             		$.ajax({
             			type: "POST",
             			url: url + "penjualan/transactionProcess",
             			data: {
+							jenis:localStorage.getItem('jenis'),
+							faktur:localStorage.getItem('faktur'),
             				bayar: bayar,
             				kembali: kembali,
             				bayar_non_tunai: bayar_non_tunai,
             				total_harga: total_harga,
-							costumer_name:$("#nama_member").val()
+							jenis_pembayaran:jenis_pembayaran,
+							costumer_id:id_member,
+							no_hp:no_hp,
+            				costumer_name: $("#nama_member").val()
             			},
             			dataType: "JSON",
             			success: function (response) {
@@ -1089,7 +1130,17 @@ $replace = [" ", "+", "-"];
             					$("#modalBayar").modal("hide");
             					$(".show-cart").html('');
             					$(".txtotal").text("RP. 0");
-            				}
+								resetBuyerForm();
+            				} else if (response.status == 'validation_failed') {
+								$(".ebayar").text(response.message.bayar);
+								$(".ejenis_pembayaran").text(response.message.jenis_pembayaran);
+            				} else if(response.status=='chart emty'){
+								swal({
+									title:"Maaf !!",
+									text:response.msg,
+									icon:"warning",
+								});
+							}
 
             			},
             			error: function () {
