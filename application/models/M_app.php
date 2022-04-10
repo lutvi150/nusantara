@@ -139,7 +139,7 @@ class M_app extends CI_Model
         if ($jenis !== "Semua") {
             $this->db->where('kategori', $jenis);
         }
-        if ($filter !== null) {
+        if ($filter !== "") {
             $this->db->like('nama', $filter);
             $this->db->or_like('kode', $filter);
         }
@@ -154,33 +154,14 @@ class M_app extends CI_Model
         if ($jenis !== "Semua") {
             $this->db->where('kategori', $jenis);
         }
-
-        if ($filter !== null) {
+        if ($filter !== "") {
             $this->db->like('nama', $filter);
             $this->db->or_like('kode', $filter);
         }
         return $this->db->count_all_results();
 
     }
-    // end pagination product
-    public function pagination_data($limit, $start, $table)
-    {
-        $this->db->from($table);
-        if ($jenis !== "Semua") {
-            $this->db->where('', $Value);
 
-        }
-        $this->db->limit($limit, $start);
-        return $this->db->get()->result();
-
-    }
-
-    public function pagination_total_rows($table, $jenis)
-    {
-        $this->db->from($table);
-        return $this->db->count_all_results();
-
-    }
     // use for find specific data
     public function findData($table, $reference, $id)
     {
