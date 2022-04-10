@@ -2,7 +2,16 @@
 <html>
 <head>
 	<title>Nota</title>
-
+    <?php
+$this->view($head);
+if ($lokasi == 'CABANG 3') {echo '
+            <link rel="apple-touch-icon" sizes="76x76" href="' . base_url('assets/img/Zira.png') . '">
+            <link rel="icon" type="image/png" href="' . base_url('assets/img/Zira.png') . '">';
+} else {echo '
+            <link rel="apple-touch-icon" sizes="76x76" href="' . base_url('assets/img/elseZira.png') . '">
+            <link rel="icon" type="image/png" href="' . base_url('assets/img/elseZira.png') . '">';
+}
+?>
 </head>
 <body>
 	<div class="container mt-3">
@@ -84,5 +93,6 @@
         </div>
     </div>
 
+    <?php $this->view($head);?>
 </body>
 </html>

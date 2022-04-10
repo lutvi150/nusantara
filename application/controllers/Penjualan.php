@@ -355,6 +355,7 @@ class Penjualan extends CI_Controller
                     $this->M_app->deleteData('cart', 'kasir', $this->session->userdata('nama'));
                     $response = [
                         'status' => 'success',
+                        'faktur' => $faktur,
                         'transaksi_jual' => $transaksi_jual,
                         'transaksi_jual_produk' => $transaksi_jual_produk,
                     ];
@@ -457,6 +458,7 @@ class Penjualan extends CI_Controller
                 $this->M_app->deleteData('transaksi_jual_pending', 'faktur', $faktur);
                 $response = [
                     'status' => 'success',
+                    'faktur' => $faktur,
                     'transaksi_jual' => $transaksi_jual,
                     'transaksi_jual_produk' => $transaksi_jual_produk,
                 ];

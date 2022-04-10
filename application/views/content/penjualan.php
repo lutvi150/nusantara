@@ -1130,6 +1130,7 @@ $replace = [" ", "+", "-"];
             					$("#modalBayar").modal("hide");
             					$(".show-cart").html('');
             					$(".txtotal").text("RP. 0");
+								window.open(url+"nota/index/"+response.faktur);
 								resetBuyerForm();
             				} else if (response.status == 'validation_failed') {
 								$(".ebayar").text(response.message.bayar);
