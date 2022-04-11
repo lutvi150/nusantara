@@ -332,7 +332,7 @@
             							<label>Bayar</label>
             						</div>
             						<div class="col-6">
-            							<input type="number" onkeypress="priceBack()" class="form-control bayar">
+            							<input type="number" onkeyup="priceBack()" class="form-control bayar">
 										<span class="text-error ebayar"></span>
             						</div>
             					</div>
@@ -511,7 +511,7 @@ $replace = [" ", "+", "-"];
             <!-- modal produk -->
             <div class="modal fade" id="modalProduk" tabindex="-1" role="dialog" aria-labelledby="largemodalLabel"
             	aria-hidden="true" data-backdrop="false">
-            	<div class="modal-dialog modal-lg" style="width: 1000px;" role="document">
+            	<div class="modal-dialog modal-lg" style="width: 100%;" role="document">
             		<div class="modal-content">
             			<div class="modal-header">
             				<h5 class="title-modal" id="largemodalLabel">Data Produk</h5>
