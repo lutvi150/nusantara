@@ -543,4 +543,32 @@ class Penjualan extends CI_Controller
             ];}
         echo json_encode($response);
     }
+    public function getQr()
+    {
+        $code = $this->input->post('code');
+        $this->form_validation->set_rules('code', 'Kode Produk', 'trim|required', [
+            'required' => 'Kode Produk harus diisi',
+        ]);
+
+        if ($this->form_validation->run() == false) {
+            $response = [
+                'status' => 'validation_failed',
+                'errors' => $this->form_validation->error_array(),
+            ];
+        } else {
+            $data = $this->M_app->findData('produk', 'barcode', $code)->row();
+            if ($data == null) {
+                $response = [
+                    'status' => 'not_found',
+                    'message' => 'Kode Produk tidak ditemukan',
+                ];
+            } else {
+                $response = [
+                    'status' => 'success',
+                    'data' => $data,
+                ];
+            }
+        }
+        echo json_encode($response);
+    }
 }

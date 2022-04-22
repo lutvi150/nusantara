@@ -84,11 +84,14 @@
             								style="border-right: 1px solid #eee; padding: 10px 25px;">
             								<h5 class="title-modal mb-2">Produk</h5>
             								<div class="row mb-2">
-            									<div class="col-4">Kode Produk</div>
+            									<div class="col-4 text-code-product">Kode Produk</div>
             									<div class="col-8">
             										<div class="input-group">
             											<input type="text" onchange="searchProduk()"
             												class="form-control" name="kode_produk" id="kode_produk">
+															<input type="text"
+            												class="form-control" name="barcode" id="barcode">
+															<span class="text-error ekode-produk"></span>
             											<div class="input-group-append">
             												<button type="button" class="btn btn-group-grey"
             													data-toggle="modal"
@@ -110,8 +113,8 @@
             										<div class="form-inline">
             											<div class="form-group" style="width: 80%;">Auto Scan</div>
             											<div class="form-group"><label class="form-check-label"><input
-            														type="checkbox" class="form-check-input"
-            														value=""></label></div>
+            														type="checkbox" class="form-check-input auto-scan" onclick="checkCheckbox()"
+            														value="auto"></label></div>
             										</div>
             									</div>
             									<div class="col-8">
@@ -780,7 +783,7 @@ $replace = [" ", "+", "-"];
             	function editTable(kode_brg, status, type) {
             		$(".show-text").removeAttr("hidden");
             		$(".edit-text").attr("hidden", true);
-            		console.log(status);
+            		// console.log(status);
             		if (status == true) {
             			if (type == 'ket') {
             				$("#txtedit_" + kode_brg).removeAttr("hidden");
@@ -852,7 +855,7 @@ $replace = [" ", "+", "-"];
             	// use for next buyer form
             	function nextBuyerForm() {
             		phone_number = localStorage.getItem("phone_number")
-            		console.log(phone_number);
+            		// console.log(phone_number);
             		if (phone_number == "null") {
             			swal({
             				title: "Peringatan!",
@@ -1087,7 +1090,7 @@ $replace = [" ", "+", "-"];
             	// use for enable and disable btn slect category
 				function enBtnTypePayment(status) {
 					if (status==true) {
-						console.log('disab;ed');
+						// console.log('disab;ed');
 						$("#id_kategori").attr("disabled",true);
 					} else{
 						$("#id_kategori").removeAttr("disabled");
@@ -1161,5 +1164,60 @@ $replace = [" ", "+", "-"];
             		let backPrice = parseInt(bayar) - parseInt(total_harga);
             		$(".kembali").val(backPrice)
             	}
+				$("#kode_produk").bind("change paste",function () {
+					$(".ekode-produk").text("")
+					let code=$(this).val();
 
+				 });
+				 function postQr(code) {
+					 $.ajax({
+						 type: "POST",
+						 url: url+"penjualan/getQr",
+						 data: {qode:qode},
+						 dataType: "JSON",
+						 success: function (response) {
+							 if (response.status=='success') {
+								 localStorage.setItem('kode_produk',response.kode);
+								$("#kode_produk").val(response.data.kode);
+            				$("#namaproduk").val(response.data.nama);
+            				$("#harga_produk").val(response.data.harga);
+            				$(".satuan").val(response.data.satuan);
+            				$("#satuan").val(response.data.satuan);
+							 } else if(response.status=='validation_failed'){
+								 swal({
+									 title:"Maaf !!",
+									 text:"Kode Produk Tidak Boleh Kosong",
+									 icon:"warning",
+								 });
+							 } else if (response.status=='not_found'){
+								 swal({
+									 title:"Maaf !!",
+									 text:"Kode Produk Tidak Ditemukan",
+									 icon:"warning",
+								 });
+							 } else{
+								 swal({
+									 title:"Maaf !!",
+									 text:"Server Error",
+									 icon:"warning",
+								 });
+							 }
+						 },error:function(){
+							 swal({
+								 title: "Peringatan!",
+								 text: "Server Error",
+								 icon: "warning",
+								 button: "Ok",
+							 });
+						 }
+					 });
+				  }
+				  function checkCheckbox() {
+					  let menu=$(".auto-scan").is(":checked");
+					  if (menu==true) {
+						  $(".text-code-product").text("Scan Barcode");
+					  } else{
+						  $(".auto-scan").prop("checked",true);
+					  }
+				   }
             </script>
