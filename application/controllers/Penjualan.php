@@ -545,8 +545,8 @@ class Penjualan extends CI_Controller
     }
     public function getQr()
     {
-        $code = $this->input->post('code');
-        $this->form_validation->set_rules('code', 'Kode Produk', 'trim|required', [
+        $code = $this->input->post('barcode');
+        $this->form_validation->set_rules('barcode', 'Barcode Tidak Boleh Kosong', 'trim|required', [
             'required' => 'Kode Produk harus diisi',
         ]);
 

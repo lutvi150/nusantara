@@ -10,7 +10,7 @@
             			<div class="row" onclick="editTable(1,false,'')">
             				<div class="col-12"
             					style="font-size: 12px; padding: 15px 15px; background: #FFFFFF; box-shadow: 0px 12px 26px rgba(16, 30, 115, 0.06); border-radius: 20px;">
-            					<form>
+
             						<div class="row">
             							<div class="col-12 col-md-4 col-lg-4"
             								style="border-right: 1px solid #eee; padding: 5px 25px;">
@@ -89,11 +89,11 @@
             										<div class="input-group">
             											<input type="text" onchange="searchProduk()"
             												class="form-control" name="kode_produk" id="kode_produk">
-															<input type="text"
+															<input type="text" hidden
             												class="form-control" name="barcode" id="barcode">
 															<span class="text-error ekode-produk"></span>
             											<div class="input-group-append">
-            												<button type="button" class="btn btn-group-grey"
+            												<button type="button" class="btn btn-group-grey btn-modal-produk"
             													data-toggle="modal"
             													data-target="#modalProduk">...</button>
             											</div>
@@ -253,7 +253,6 @@
             								</div>
             							</div>
             						</div>
-            					</form>
             				</div>
             			</div>
 
@@ -1169,11 +1168,36 @@ $replace = [" ", "+", "-"];
 					let code=$(this).val();
 
 				 });
-				 function postQr(code) {
+
+				  function checkCheckbox() {
+					  let menu=$(".auto-scan").is(":checked");
+					  if (menu==true) {
+						  $(".text-code-product").text("Scan Barcode");
+						  $(".kode_produk")
+						  $(".btn-modal-produk").attr("disabled",true);
+						  $(".auto-scan").prop("checked",true);
+						  $("#kode_produk").attr("hidden",true);
+						  $("#barcode").attr("hidden",false).focus();
+					  } else{
+						  $(".text-code-product").text("Kode Produk");
+						  $(".auto-scan").prop("checked",false);
+						  $(".btn-modal-produk").attr("disabled",false);
+						  $("#kode_produk").attr("hidden",false).focus();
+						  $("#barcode").attr("hidden",true);
+					  }
+				   }
+				$("#barcode").bind("change paste",function () {
+					$(".ekode-produk").text("")
+					let code=$(this).val();
+					postQr(code);
+					console.log(code);
+					$("#barcode").val("");
+				 });
+				 function postQr(barcode) {
 					 $.ajax({
 						 type: "POST",
 						 url: url+"penjualan/getQr",
-						 data: {qode:qode},
+						 data: {barcode:barcode},
 						 dataType: "JSON",
 						 success: function (response) {
 							 if (response.status=='success') {
@@ -1186,7 +1210,7 @@ $replace = [" ", "+", "-"];
 							 } else if(response.status=='validation_failed'){
 								 swal({
 									 title:"Maaf !!",
-									 text:"Kode Produk Tidak Boleh Kosong",
+									 text:"Barcode Tidak Boleh Kosong",
 									 icon:"warning",
 								 });
 							 } else if (response.status=='not_found'){
@@ -1212,12 +1236,4 @@ $replace = [" ", "+", "-"];
 						 }
 					 });
 				  }
-				  function checkCheckbox() {
-					  let menu=$(".auto-scan").is(":checked");
-					  if (menu==true) {
-						  $(".text-code-product").text("Scan Barcode");
-					  } else{
-						  $(".auto-scan").prop("checked",true);
-					  }
-				   }
             </script>
